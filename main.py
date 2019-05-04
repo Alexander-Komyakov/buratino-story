@@ -1,20 +1,30 @@
 #!/usr/bin/env python3
 
+import time
 import pygame
 import random
 import sys
+
+class Player(): #игрок
+    def __init__(self, x, y, path, stop, coord, name): #координаты x y путь к картинке, остановлен, координаты по цифрам, имя
+        self.x = x; self.y = y
+        self.path = path
+        self.stop = stop
+        self.coord = coord
+        self.name = name
+        self.sprite = pygame.image.load(path)
 
 class Menu():
     def __init__(self, punkts = [["Game", 16, 0, 0]]):
         self.punkts = punkts #массив данных о пунктах: текст размер x y
         self.numPunkt = 0 #выбранный номер пункта в меню
-        # Выбираем шрифт, который мы будем использовать.
-        # Стандартный шрифт, 25 точек.
+        #Выбираем шрифт, который мы будем использовать.
+        #Стандартный шрифт, 25 точек.
         self.font = pygame.font.Font(None, 25) 
 
-        # Рисуем текст. "True" означает использовать сглаживание
-        # Black -- цвет текста. Следующая строка создает образ текста
-        # но не рисует его на экране.
+        #Рисуем текст. "True" означает использовать сглаживание
+        #цвет текста. Следующая строка создает образ текста
+        #но не рисует его на экране.
         self.text = self.font.render("My text", True, [0, 0, 0])
     def render(self, screen, Punkt, punkts):
         screen.fill((0, 0, 255))
@@ -76,12 +86,22 @@ class Menu():
 
 
 
-def drawWindow(): #обновление окна и рисование на нем
+def beginToEnd(begin, end, speed): #доносит от начальной до конечной точки число begin
+    if begin < end:
+        begin += 1
+        time.sleep(speed)
+        return False
+    elif begin > end:
+        begin -= 1
+        time.sleep(speed)
+        return False
+    else:
+        return True
+
+def drawWindow(Gamers): #обновление окна и рисование на нем
     win.blit(fon, (0, 0))
-    win.blit(player1, (x1, y1))
-    win.blit(player2, (x2, y2))
-    win.blit(player3, (x3, y3))
-    win.blit(player4, (x4, y4))
+    for i in Gamers:
+        win.blit(i.sprite, (i.x, i.y))
 
     pygame.display.update()
 
@@ -150,90 +170,56 @@ coordMap = [[1748, 950], [1660, 945], [1570, 965], [1453, 968], [1359, 965],\
         [263, 232], [370, 239], [451, 240], [531, 242],\
         [606, 251], [690, 242], [795, 207], [867, 226],\
         [942, 243], [1012, 243], [1088, 235], [1178, 206]]
-pygame.init() #инициализируем pygame
-pygame.font.init() #инициализация шрифтов
 
+
+pygame.init() #инициализируем pygame
 win = pygame.display.set_mode((1920, 1080)) #создаем окно
 pygame.display.set_caption("Buratino Story") #подписываем окно
 fon = pygame.image.load("fon.jpeg") #загружаем карту игры
 
+#пункты меню
 punkts = [["Два игрока", 116, 1920//2 - 180, 1080//2 - 168],\
         ["Три игрока", 116, 1920//2 - 180, (1080//2) - 68],\
         ["Четыре игрока", 116, 1920//2 - 180, (1080//2) + 32],\
         ["Выход", 116, 1920//2 - 180, (1080//2) + 132]]
 
 menu = Menu(punkts) #создаем объект класса Menu
-if menu.start(win) == 0:
-    players = 2
-elif menu.start(win) == 1:
-    players = 3
-elif menu.start(win) == 2:
-    players = 4
 
-#загружаем спрайты игроков
-player1 = pygame.image.load("player1.png")
-player2 = pygame.image.load("player2.png")
-player3 = pygame.image.load("player3.png")
-player4 = pygame.image.load("player4.png")
+#создаем игроков
+Gamers = [Player(1692, 900, "player1.png", 0, 0, "Player1"),\
+        Player(1718, 900, "player2.png", 0, 0, "Player2")]
 
-#ставим начальные координаты игроков
-x1 = 1748 - (player1.get_width()//2) 
-y1 = 950 - (player1.get_height()//2) 
-x2 = 1768 - (player2.get_width()//2) 
-y2 = 950 - (player2.get_height()//2) 
+item_selection = menu.start(win) #возвращает выбранный пункт меню
+if item_selection == 1: #если игрок выбрал 3 игрока
+    Gamers.append(Player(1649, 896, "player3.png", 0, 0, "Player3"))
+elif item_selection == 2: #если выбрал 4 игрока
+    Gamers.append(Player(1670, 896, "player3.png", 0, 0, "Player4"))
 
-#третего и четвертого игрока может не быть, поэтому выводим сначала их за карту
-x3 = -1000
-y3 = -1000
-x4 = -1000
-y4 = -1000
+drawWindow(Gamers) #рисуем фон
 
-drawWindow() #рисуем фон
-
-#players = int(input("Введите кол-во игроков: ")) #кол-во игроков
-
-#расставляем остальные фигурки в зависимости от кол-во игроков
-if players == 3:
-    x3 = 1699 - (player3.get_width()//2) 
-    y3 = 944 - (player3.get_height()//2) 
-if players >= 4: 
-    x4 = 1720 - (player4.get_width()//2) 
-    y4 = 944 - (player4.get_height()//2) 
-    x3 = 1699 - (player3.get_width()//2) 
-    y3 = 944 - (player3.get_height()//2) 
- 
-names = [] #имена игроков
-coord = [] #координаты игроков
-stop = [] #наступил ли герой на остановку(красную) move = 0 #номер игрока который ходит
 victory = False #победа
 move = 0
 
-for i in range(0, players): #ввод имен игроков
-    print("Введите имя", i+1, "игрока:", end=" ")
-    names.append(str(i)) #вводим имя игрока
-    coord.append(0) #добавляем начальную координату нового игрока
-    stop.append(0) #обнуляем остановку героя
-
 while victory == False: #пока никто не победил работает игра
-    drawWindow()
+    drawWindow(Gamers)
     #отображение координат
-    for i in range(0, players):
-        print(names[i], coord[i])
+    for i in range(0, len(Gamers)):
+        print(Gamers[i].name, Gamers[i].coord)
 
-    if CoordStop(coord[move]): #если герой стоит на красной кнопке
-        if stop[move] == 1: #пропустил ли он уже один ход
-            stop[move] = 0 #продолжает игру
+    if CoordStop(Gamers[move].coord): #если герой стоит на красной кнопке
+        if Gamers[move].stop == 1: #пропустил ли он уже один ход
+            Gamers[move].stop = 0 #продолжает игру
         else: #если еще не пропустил
-            stop[move] = 1 #пропускает
+            Gamers[move].stop = 1 #пропускает
     else: #если он не на красной
-        stop[move] = 0  #убираем остановку героя
+        Gamers[move].stop = 0 #убираем остановку героя
 
-    if stop[move] == 1: #если игрок наступил на красную
-        if move < players-1: #передаем ход следующему игроку
+    if Gamers[move].stop == 1: #если игрок наступил на красную
+        if move < len(Gamers)-1: #передаем ход следующему игроку
             move += 1
         else: #если последний игрок
             move = 0 #передаем ход первому игроку
-        stop[move] = 0 #обнуляем его остановку
+        Gamers[move].stop = 0 #обнуляем его остановку
     
     #бросок кубика
     print("Для броска кубика нажмите Enter")
@@ -248,48 +234,37 @@ while victory == False: #пока никто не победил работае�
                     key = False 
                 if event.key == pygame.K_ESCAPE:
                     menu.pause(win)
-                    drawWindow()
+                    drawWindow(Gamers)
                     
     cub = random.randint(1, 6)
-    print(names[move], "выпало число", cub)
+    print(Gamers[move].name, "выпало число", cub)
 
-    coord[move] += cub #прибавляем к координатам героя число выпавшее
-    coord[move] = CoordCalculation(coord[move]) #расчитываем координаты игрока
+    #плавное движение модельки к месту
+    '''while True:
+        if beginToEnd(Gamers[0].x, coordMap[Gamers[0].coord+cub][0], 0.01):
+            break
+        drawWindow(Gamers)
+    '''
+
+    Gamers[move].coord += cub #прибавляем к координатам героя число выпавшее
+    Gamers[move].coord = CoordCalculation(Gamers[move].coord) #расчитываем координаты игрока
     
-    if coord[move] != 90: #если игрок не стоит на зеленой кнопке
-        if move < players-1: #передаем ход следующему игроку
+    if Gamers[move].coord != 90: #если игрок не стоит на зеленой кнопке
+        if move < len(Gamers)-1: #передаем ход следующему игроку
             move += 1
         else: #если последний игрок
             move = 0 #передаем ход первому игроку
 
 
     #проверяем, не победил ли кто-то
-    for i in range(0, players):
-        if coord[i] > 100:
-            print("Победил(а)", names[i])
+    for i in range(0, len(Gamers)):
+        if Gamers[i].coord > 100:
+            print("Победил(а)", Gamers[i].name)
             input()
             victory = True
 
     #ставим фигурки на позиции
-    if players == 2 and victory == False:
-        x1 = coordMap[coord[0]][0] - (player1.get_width()//2) 
-        y1 = coordMap[coord[0]][1] - (player1.get_height()//2) 
-        x2 = coordMap[coord[1]][0] - (player2.get_width()//2) 
-        y2 = coordMap[coord[1]][1] - (player2.get_height()//2) 
-    elif players == 3 and victory == False:
-        x1 = coordMap[coord[0]][0] - (player1.get_width()//2) 
-        y1 = coordMap[coord[0]][1] - (player1.get_height()//2) 
-        x2 = coordMap[coord[1]][0] - (player2.get_width()//2) 
-        y2 = coordMap[coord[1]][1] - (player2.get_height()//2) 
-        x3 = coordMap[coord[2]][0] - (player3.get_width()//2) 
-        y3 = coordMap[coord[2]][1] - (player3.get_height()//2) 
-    elif players == 4 and victory == False:
-        x1 = coordMap[coord[0]][0] - (player1.get_width()//2) 
-        y1 = coordMap[coord[0]][1] - (player1.get_height()//2) 
-        x2 = coordMap[coord[1]][0] - (player2.get_width()//2) 
-        y2 = coordMap[coord[1]][1] - (player2.get_height()//2) 
-        x3 = coordMap[coord[2]][0] - (player3.get_width()//2) 
-        y3 = coordMap[coord[2]][1] - (player3.get_height()//2) 
-        x4 = coordMap[coord[3]][0] - (player4.get_width()//2) 
-        y4 = coordMap[coord[3]][1] - (player4.get_height()//2) 
+    for i in range(0, len(Gamers)):
+        Gamers[i].x = coordMap[Gamers[i].coord][0] - 50 
+        Gamers[i].y = coordMap[Gamers[i].coord][1] - 50 
 
