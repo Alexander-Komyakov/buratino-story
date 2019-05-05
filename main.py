@@ -88,7 +88,7 @@ class Menu():
                     sys.exit()
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_DOWN:
-                        if self.numPunkt < len(punkts)-1:
+                        if self.numPunkt < len(punkts)-3:
                             self.numPunkt += 1
                     if event.key == pygame.K_UP:
                         if self.numPunkt >= 1:
@@ -104,6 +104,7 @@ class Menu():
 
 def drawWindow(Gamers): #обновление окна и рисование на нем
     win.blit(fon, (0, 0))
+    win.blit(cubSprite, (20, 20))
     for i in Gamers:
         win.blit(i.sprite, (i.x, i.y))
 
@@ -177,9 +178,11 @@ coordMap = [[1748, 950], [1660, 945], [1570, 965], [1453, 968], [1359, 965],\
 
 
 pygame.init() #инициализируем pygame
+pygame.display.toggle_fullscreen #полноэкранный режим
 win = pygame.display.set_mode((1920, 1080)) #создаем окно
 pygame.display.set_caption("Buratino Story") #подписываем окно
 fon = pygame.image.load("fon.jpeg") #загружаем карту игры
+cubSprite = pygame.image.load("kost1.png") #спрайт кубика
 
 #пункты меню
 punkts = [["Два игрока", 116, 1920//2 - 180, 1080//2 - 168],\
@@ -190,25 +193,26 @@ punkts = [["Два игрока", 116, 1920//2 - 180, 1080//2 - 168],\
 menu = Menu(punkts) #создаем объект класса Menu
 
 #создаем игроков
-Gamers = [Player(1692, 900, "player1.png", 0, 0, "Player1"),\
-        Player(1718, 900, "player2.png", 0, 0, "Player2")]
+Gamers = [Player(1692, 900, "player1.png", 0, 0, "1"),\
+        Player(1718, 900, "player2.png", 0, 0, "2")]
 
 item_selection = menu.start(win) #возвращает выбранный пункт меню
 if item_selection == 1: #если игрок выбрал игроку в троем
-    Gamers.append(Player(1649, 896, "player3.png", 0, 0, "Player3"))
+    Gamers.append(Player(1649, 896, "player3.png", 0, 0, "3"))
 elif item_selection == 2: #если выбрал игроку в четвером
-    Gamers.append(Player(1670, 896, "player3.png", 0, 0, "Player4"))
+    Gamers.append(Player(1670, 896, "player3.png", 0, 0, "4"))
 
 drawWindow(Gamers) #рисуем фон
 
 victory = False #победа
 move = 0
 
+vicText = pygame.font.Font(None, 100) 
+text = vicText.render("Победил ", True, [255, 0, 0])
+
 while victory == False: #пока никто не победил работает игра
+ 
     drawWindow(Gamers)
-    #отображение координат
-    for i in range(0, len(Gamers)):
-        print(Gamers[i].name, Gamers[i].coord)
 
     if CoordStop(Gamers[move].coord): #если герой стоит на красной кнопке
         if Gamers[move].stop == 1: #пропустил ли он уже один ход
@@ -226,8 +230,8 @@ while victory == False: #пока никто не победил работае�
         Gamers[move].stop = 0 #обнуляем его остановку
     
     #бросок кубика
-    print("Для броска кубика нажмите Enter")
     key = True #нажал ли игрок клавишу
+    #управление
     while key:
         for event in pygame.event.get():
             if (event.type == pygame.QUIT):
@@ -241,7 +245,27 @@ while victory == False: #пока никто не победил работае�
                     drawWindow(Gamers)
                     
     cub = random.randint(1, 6)
-    print(Gamers[move].name, "выпало число", cub)
+    pathToCub = str("kost"+str(cub)+".png")
+    cubSprite = pygame.image.load(pathToCub) #спрайт кубика
+    #print(Gamers[move].name, "выпало число", cub)
+    #проверяем, не победил ли кто-то
+    for i in range(0, len(Gamers)):
+        if Gamers[i].coord > 100:
+            drawWindow(Gamers)
+            text = vicText.render("Победил "+Gamers[i].name+" игрок", True, [255, 0, 0])
+            win.blit(text, (650, 500))
+            pygame.display.update()
+            time.sleep(3)
+            sys.exit()
+
+    if Gamers[move].coord + cub > 100 or CoordCalculation(Gamers[move].coord + cub) > 100:
+        drawWindow(Gamers)
+        text = vicText.render("Победил "+Gamers[i].name+" игрок", True, [255, 0, 0])
+        win.blit(text, (650, 500))
+        pygame.display.update()
+        time.sleep(3)
+        sys.exit()
+
 
     #плавное движение модельки к месту
     begin = Gamers[move].coord #начальная координата героя
@@ -253,6 +277,7 @@ while victory == False: #пока никто не победил работае�
                 break #переходим к следующей
             drawWindow(Gamers) #обновляем экран
 
+    
     Gamers[move].coord += cub #прибавляем к координатам героя число выпавшее
 
     #плавное движение модельки к месту
@@ -270,15 +295,7 @@ while victory == False: #пока никто не победил работае�
             move += 1
         else: #если последний игрок
             move = 0 #передаем ход первому игроку
-
-
-    #проверяем, не победил ли кто-то
-    for i in range(0, len(Gamers)):
-        if Gamers[i].coord > 100:
-            print("Победил(а)", Gamers[i].name)
-            input()
-            victory = True
-
+    
     #ставим фигурки на позиции
     for i in range(0, len(Gamers)):
         Gamers[i].x = coordMap[Gamers[i].coord][0] - 50 
