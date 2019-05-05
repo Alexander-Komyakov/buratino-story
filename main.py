@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 
-import time
-import pygame
-import random
-import sys
+import time, pygame, random, sys
 
 class Player(): #игрок
     def __init__(self, x, y, path, stop, coord, name): #координаты x y путь к картинке, остановлен, координаты по цифрам, имя
@@ -13,6 +10,25 @@ class Player(): #игрок
         self.coord = coord
         self.name = name
         self.sprite = pygame.image.load(path)
+
+    def beginToEnd(self, endX, endY, speed=0.001): #двигает игрока к конечной точке на 1 пиксель и если он достиг возвращает True
+        end = False
+        if self.x + 50 >= endX - 5 and self.x + 50 <= endX + 5: #если равен конечной точке по X
+            end = True
+        elif self.x + 50 < endX: #если x игрока меньше конечной точки
+            self.x += 4 #увеличиваем x игрока
+        elif self.x + 50 > endX: #если x игрока больше
+            self.x -= 4 #уменьшаем
+
+        if self.y + 50 >= endY - 5 and  self.y + 50 <= endY + 5: #если пришел к концу по x и по y
+            if end == True:
+                return True #повзвращаем True
+        elif self.y + 50 < endY:
+            self.y += 4
+        elif self.y + 50 > endY:
+            self.y -= 4
+        #time.sleep(speed)
+        return False
 
 class Menu():
     def __init__(self, punkts = [["Game", 16, 0, 0]]):
@@ -85,18 +101,6 @@ class Menu():
             self.render(win, punktsPause[self.numPunkt], punktsPause)
 
 
-
-def beginToEnd(begin, end, speed): #доносит от начальной до конечной точки число begin
-    if begin < end:
-        begin += 1
-        time.sleep(speed)
-        return False
-    elif begin > end:
-        begin -= 1
-        time.sleep(speed)
-        return False
-    else:
-        return True
 
 def drawWindow(Gamers): #обновление окна и рисование на нем
     win.blit(fon, (0, 0))
@@ -190,9 +194,9 @@ Gamers = [Player(1692, 900, "player1.png", 0, 0, "Player1"),\
         Player(1718, 900, "player2.png", 0, 0, "Player2")]
 
 item_selection = menu.start(win) #возвращает выбранный пункт меню
-if item_selection == 1: #если игрок выбрал 3 игрока
+if item_selection == 1: #если игрок выбрал игроку в троем
     Gamers.append(Player(1649, 896, "player3.png", 0, 0, "Player3"))
-elif item_selection == 2: #если выбрал 4 игрока
+elif item_selection == 2: #если выбрал игроку в четвером
     Gamers.append(Player(1670, 896, "player3.png", 0, 0, "Player4"))
 
 drawWindow(Gamers) #рисуем фон
@@ -240,15 +244,27 @@ while victory == False: #пока никто не победил работае�
     print(Gamers[move].name, "выпало число", cub)
 
     #плавное движение модельки к месту
-    '''while True:
-        if beginToEnd(Gamers[0].x, coordMap[Gamers[0].coord+cub][0], 0.01):
-            break
-        drawWindow(Gamers)
-    '''
+    begin = Gamers[move].coord #начальная координата героя
+    end = Gamers[move].coord + cub #конечная требуемая координата
+    for i in range(begin, end): #двигаем игрока по одной точке
+        while True:
+            if i + 1 <= end and Gamers[move].beginToEnd(coordMap[i+1][0], coordMap[i+1][1]): #если игрок пришел к требуемой точке
+                #и она не предпоследняя
+                break #переходим к следующей
+            drawWindow(Gamers) #обновляем экран
 
     Gamers[move].coord += cub #прибавляем к координатам героя число выпавшее
+
+    #плавное движение модельки к месту
+    begin = Gamers[move].coord #начальная координата героя
+    end = CoordCalculation(Gamers[move].coord) #конечная требуемая координата
+    while True:
+        if Gamers[move].beginToEnd(coordMap[end][0], coordMap[end][1]): #если игрок пришел к требуемой точке
+            break #переходим к следующей
+        drawWindow(Gamers) #обновляем экран
+
     Gamers[move].coord = CoordCalculation(Gamers[move].coord) #расчитываем координаты игрока
-    
+
     if Gamers[move].coord != 90: #если игрок не стоит на зеленой кнопке
         if move < len(Gamers)-1: #передаем ход следующему игроку
             move += 1
