@@ -2,6 +2,9 @@
 
 import time, pygame, random, sys
 
+pygame.init() #инициализируем pygame
+display_width = pygame.display.Info().current_w
+display_height = pygame.display.Info().current_h
 class Player(): #игрок
     def __init__(self, x, y, path, stop, coord, name): #координаты x y путь к картинке, остановлен, координаты по цифрам, имя
         self.x = x; self.y = y
@@ -79,8 +82,8 @@ class Menu():
 
             self.render(win, punkts[self.numPunkt], self.punkts)
     def pause(self, win):
-        punktsPause = [["Продолжить", 116, 1920//2 - 180, 1080//2 - 168],\
-                ["Выход", 116, 1920//2 - 180, (1080//2) - 68]]
+        punktsPause = [["Продолжить", 116, display_width//2 - 180, display_height//2 - 168],\
+                ["Выход", 116, display_width//2 - 180, (display_height//2) - 68]]
         while True:
             for event in pygame.event.get():
                 if (event.type == pygame.QUIT):
@@ -106,7 +109,7 @@ def drawWindow(Gamers): #обновление окна и рисование н�
     win.blit(fon, (0, 0))
     win.blit(cubSprite, (20, 20))
     for i in Gamers:
-        win.blit(i.sprite, (i.x, i.y))
+        win.blit(i.sprite, ((i.x * (display_width/1920)), (i.y * (display_height/1080))))
 
     pygame.display.update()
 
@@ -177,18 +180,18 @@ coordMap = [[1748, 950], [1660, 945], [1570, 965], [1453, 968], [1359, 965],\
         [942, 243], [1012, 243], [1088, 235], [1178, 206]]
 
 
-pygame.init() #инициализируем pygame
 pygame.display.toggle_fullscreen #полноэкранный режим
-win = pygame.display.set_mode((1920, 1080)) #создаем окно
+win = pygame.display.set_mode((display_width, display_height)) #создаем окно
 pygame.display.set_caption("Buratino Story") #подписываем окно
 fon = pygame.image.load("fon.jpeg") #загружаем карту игры
+fon = pygame.transform.scale(fon, (display_width, display_height))
 cubSprite = pygame.image.load("kost1.png") #спрайт кубика
 
 #пункты меню
-punkts = [["Два игрока", 116, 1920//2 - 180, 1080//2 - 168],\
-        ["Три игрока", 116, 1920//2 - 180, (1080//2) - 68],\
-        ["Четыре игрока", 116, 1920//2 - 180, (1080//2) + 32],\
-        ["Выход", 116, 1920//2 - 180, (1080//2) + 132]]
+punkts = [["Два игрока", 116, display_width//2 - 180, display_height//2 - 168],\
+        ["Три игрока", 116, display_width//2 - 180, (display_height//2) - 68],\
+        ["Четыре игрока", 116, display_width//2 - 180, (display_height//2) + 32],\
+        ["Выход", 116, display_width//2 - 180, (display_height//2) + 132]]
 
 menu = Menu(punkts) #создаем объект класса Menu
 
@@ -200,7 +203,8 @@ item_selection = menu.start(win) #возвращает выбранный пун
 if item_selection == 1: #если игрок выбрал игроку в троем
     Gamers.append(Player(1649, 896, "player3.png", 0, 0, "3"))
 elif item_selection == 2: #если выбрал игроку в четвером
-    Gamers.append(Player(1670, 896, "player3.png", 0, 0, "4"))
+    Gamers.append(Player(1649, 896, "player3.png", 0, 0, "3"))
+    Gamers.append(Player(1670, 896, "player4.png", 0, 0, "4"))
 
 drawWindow(Gamers) #рисуем фон
 
@@ -253,7 +257,7 @@ while victory == False: #пока никто не победил работае�
         if Gamers[i].coord > 100:
             drawWindow(Gamers)
             text = vicText.render("Победил "+Gamers[i].name+" игрок", True, [255, 0, 0])
-            win.blit(text, (650, 500))
+            win.blit(text, (650 * (display_width/1920), 500 * (display_height/1080)))
             pygame.display.update()
             time.sleep(3)
             sys.exit()
