@@ -3,8 +3,14 @@
 import time, pygame, random, sys
 
 pygame.init() #инициализируем pygame
-display_width = pygame.display.Info().current_w
+
+# получаем разрешение монитора
+display_width = pygame.display.Info().current_w 
 display_height = pygame.display.Info().current_h
+#в начале было 1920 1080
+#для масштабирование изменения внесены после
+#и все они отталкиваются от начального
+
 class Player(): #игрок
     def __init__(self, x, y, path, stop, coord, name): #координаты x y путь к картинке, остановлен, координаты по цифрам, имя
         self.x = x; self.y = y
