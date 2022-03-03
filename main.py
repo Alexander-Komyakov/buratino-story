@@ -7,18 +7,44 @@ pygame.init() #инициализируем pygame
 # получаем разрешение монитора
 display_width = pygame.display.Info().current_w 
 display_height = pygame.display.Info().current_h
+
+move = 0
 #в начале было 1920 1080
 #для масштабирование изменения внесены после
 #и все они отталкиваются от начального
 
 class Player(): #игрок
-    def __init__(self, x, y, path, stop, coord, name): #координаты x y путь к картинке, остановлен, координаты по цифрам, имя
+    def __init__(self, x, y, path, stop, coord, name, frame_count=1): #координаты x y путь к картинке, остановлен, координаты по цифрам, имя
         self.x = x; self.y = y
         self.path = path
         self.stop = stop
         self.coord = coord
         self.name = name
-        self.sprite = pygame.image.load(path)
+        #анимация, n спрайтов
+        self.sprites = []
+        #количество спрайтов
+        self.frame_count = frame_count
+        self.set_sprite(self.path, self.frame_count)
+        self.now_sprite = 0
+    def set_sprite(self, path, frame_count=1):
+        #загружаем кадры
+        for i in range(0, frame_count):
+            #добавляем в путь цифру кадра
+            path_num_point = path[::-1].find(".") + 1
+            new_path = path[0:-path_num_point] + str(i+1) + path[-path_num_point:]
+
+            self.sprites.append(pygame.image.load(new_path))
+            self.sprites[i] = pygame.transform.scale(self.sprites[i], (100, 80))
+            self.sprites[i].set_colorkey((255, 255, 255))
+    def get_sprite(self, anim=False):
+        if (anim):
+            self.animation()
+        return self.sprites[self.now_sprite]
+    def animation(self):
+        if (self.now_sprite < self.frame_count-1):
+            self.now_sprite += 1
+        else:
+            self.now_sprite = 0
 
     def beginToEnd(self, endX, endY, speed=0.001): #двигает игрока к конечной точке на 1 пиксель и если он достиг возвращает True
         end = False
@@ -45,21 +71,22 @@ class Menu():
         self.numPunkt = 0 #выбранный номер пункта в меню
         #Выбираем шрифт, который мы будем использовать.
         #Стандартный шрифт, 25 точек.
-        self.font = pygame.font.Font(None, 25) 
+        self.font = pygame.font.Font(font_path, 25) 
 
         #Рисуем текст. "True" означает использовать сглаживание
         #цвет текста. Следующая строка создает образ текста
         #но не рисует его на экране.
         self.text = self.font.render("My text", True, [0, 0, 0])
     def render(self, screen, Punkt, punkts):
-        screen.fill((0, 0, 255))
+#        screen.fill((0, 0, 255))
+        win.blit(menu_fon, (0, 0))
         for i in punkts:
             if i == Punkt:
-                self.font = pygame.font.Font(None, i[1]) 
+                self.font = pygame.font.Font(font_path, i[1]) 
                 self.text = self.font.render(i[0], True, [255, 0, 0])
                 screen.blit(self.text, (i[2], i[3]))
             else:
-                self.font = pygame.font.Font(None, i[1]) 
+                self.font = pygame.font.Font(font_path, i[1]) 
                 self.text = self.font.render(i[0], True, [0, 0, 0])
                 screen.blit(self.text, (i[2], i[3]))
         pygame.display.update()
@@ -88,8 +115,9 @@ class Menu():
 
             self.render(win, punkts[self.numPunkt], self.punkts)
     def pause(self, win):
-        punktsPause = [["Продолжить", 116, display_width//2 - 180, display_height//2 - 168],\
-                ["Выход", 116, display_width//2 - 180, (display_height//2) - 68]]
+        punktsPause = [["Продолжить", 116, display_width//2 - 280, display_height//2 - 168],\
+                ["Выход", 116, display_width//2 - 280, (display_height//2) - 68]]
+        self.numPunkt = 0
         while True:
             for event in pygame.event.get():
                 if (event.type == pygame.QUIT):
@@ -115,10 +143,14 @@ def drawWindow(Gamers): #обновление окна и рисование н�
     win.blit(fon, (0, 0))
     win.blit(cubSprite, (20, 20))
     for i in Gamers:
-        win.blit(i.sprite, ((i.x * (display_width/1920)), (i.y * (display_height/1080))))
+        #если рисуем выбранного игрока
+        #включаем анимацию
+        if (move == Gamers.index(i)):
+            win.blit(i.get_sprite(True), ((i.x * (display_width/1920)), (i.y * (display_height/1080))))
+        else:
+            win.blit(i.get_sprite(), ((i.x * (display_width/1920)), (i.y * (display_height/1080))))
 
     pygame.display.update()
-
 def CoordStop(coord): #наступил ли на останавливающую кнопку
     if coord == 6 or coord == 17 or coord == 25 or coord == 30 or coord == 43\
             or coord == 46 or coord == 49 or coord == 53 or coord == 57\
@@ -189,35 +221,40 @@ coordMap = [[1748, 950], [1660, 945], [1570, 965], [1453, 968], [1359, 965],\
 pygame.display.toggle_fullscreen #полноэкранный режим
 win = pygame.display.set_mode((display_width, display_height)) #создаем окно
 pygame.display.set_caption("Buratino Story") #подписываем окно
+
 fon = pygame.image.load("fon.jpeg") #загружаем карту игры
 fon = pygame.transform.scale(fon, (display_width, display_height))
+
+menu_fon = pygame.image.load("menu_fon.jpeg") #загружаем фон меню
+menu_fon = pygame.transform.scale(menu_fon, (display_width, display_height))
+
 cubSprite = pygame.image.load("kost1.png") #спрайт кубика
 
+font_path = "buratino.ttf"
 #пункты меню
-punkts = [["Два игрока", 116, display_width//2 - 180, display_height//2 - 168],\
-        ["Три игрока", 116, display_width//2 - 180, (display_height//2) - 68],\
-        ["Четыре игрока", 116, display_width//2 - 180, (display_height//2) + 32],\
-        ["Выход", 116, display_width//2 - 180, (display_height//2) + 132]]
+punkts = [["Два игрока", 116, display_width//2 - 280, display_height//2 - 168],\
+        ["Три игрока", 116, display_width//2 - 280, (display_height//2) - 68],\
+        ["Четыре игрока", 116, display_width//2 - 280, (display_height//2) + 32],\
+        ["Выход", 116, display_width//2 - 280, (display_height//2) + 132]]
 
 menu = Menu(punkts) #создаем объект класса Menu
 
 #создаем игроков
-Gamers = [Player(1692, 900, "player1.png", 0, 0, "1"),\
-        Player(1718, 900, "player2.png", 0, 0, "2")]
+Gamers = [Player(1692, 900, "./horse/horse.png", 0, 0, "1", 13),\
+        Player(1718, 900, "player.png", 0, 0, "2")]
 
 item_selection = menu.start(win) #возвращает выбранный пункт меню
 if item_selection == 1: #если игрок выбрал игроку в троем
-    Gamers.append(Player(1649, 896, "player3.png", 0, 0, "3"))
+    Gamers.append(Player(1649, 896, "player.png", 0, 0, "3"))
 elif item_selection == 2: #если выбрал игроку в четвером
-    Gamers.append(Player(1649, 896, "player3.png", 0, 0, "3"))
-    Gamers.append(Player(1670, 896, "player4.png", 0, 0, "4"))
+    Gamers.append(Player(1649, 896, "player.png", 0, 0, "3"))
+    Gamers.append(Player(1670, 896, "player.png", 0, 0, "4"))
 
 drawWindow(Gamers) #рисуем фон
 
 victory = False #победа
-move = 0
 
-vicText = pygame.font.Font(None, 100) 
+vicText = pygame.font.Font(font_path, 100) 
 text = vicText.render("Победил ", True, [255, 0, 0])
 
 while victory == False: #пока никто не победил работает игра
@@ -257,7 +294,6 @@ while victory == False: #пока никто не победил работае�
     cub = random.randint(1, 6)
     pathToCub = str("kost"+str(cub)+".png")
     cubSprite = pygame.image.load(pathToCub) #спрайт кубика
-    #print(Gamers[move].name, "выпало число", cub)
     #проверяем, не победил ли кто-то
     for i in range(0, len(Gamers)):
         if Gamers[i].coord > 100:
