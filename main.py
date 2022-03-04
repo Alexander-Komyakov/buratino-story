@@ -14,7 +14,7 @@ move = 0
 #и все они отталкиваются от начального
 
 class Player(): #игрок
-    def __init__(self, x, y, path, stop, coord, name, frame_count=1): #координаты x y путь к картинке, остановлен, координаты по цифрам, имя
+    def __init__(self, x, y, path, stop, coord, name, frame_count=1, scale=(100,80)): #координаты x y путь к картинке, остановлен, координаты по цифрам, имя
         self.x = x; self.y = y
         self.path = path
         self.stop = stop
@@ -24,8 +24,10 @@ class Player(): #игрок
         self.sprites = []
         #количество спрайтов
         self.frame_count = frame_count
+        self.scale = scale
         self.set_sprite(self.path, self.frame_count)
         self.now_sprite = 0
+        self.time_begin = time.time()
     def set_sprite(self, path, frame_count=1):
         #загружаем кадры
         for i in range(0, frame_count):
@@ -34,17 +36,20 @@ class Player(): #игрок
             new_path = path[0:-path_num_point] + str(i+1) + path[-path_num_point:]
 
             self.sprites.append(pygame.image.load(new_path))
-            self.sprites[i] = pygame.transform.scale(self.sprites[i], (100, 80))
+            self.sprites[i] = pygame.transform.scale(self.sprites[i], self.scale)
             self.sprites[i].set_colorkey((255, 255, 255))
     def get_sprite(self, anim=False):
         if (anim):
             self.animation()
         return self.sprites[self.now_sprite]
     def animation(self):
-        if (self.now_sprite < self.frame_count-1):
-            self.now_sprite += 1
-        else:
-            self.now_sprite = 0
+        time_now = time.time()
+        if (time_now > self.time_begin + 0.1):
+            if (self.now_sprite < self.frame_count-1):
+                self.now_sprite += 1
+            else:
+                self.now_sprite = 0
+            self.time_begin = time.time()
 
     def beginToEnd(self, endX, endY, speed=0.001): #двигает игрока к конечной точке на 1 пиксель и если он достиг возвращает True
         end = False
@@ -146,9 +151,9 @@ def drawWindow(Gamers): #обновление окна и рисование н�
         #если рисуем выбранного игрока
         #включаем анимацию
         if (move == Gamers.index(i)):
-            win.blit(i.get_sprite(True), ((i.x * (display_width/1920)), (i.y * (display_height/1080))))
+            win.blit(i.get_sprite(True), ((i.x * (display_width/1920) - (i.scale[0]/3)), (i.y * (display_height/1080) - (i.scale[1]/3))))
         else:
-            win.blit(i.get_sprite(), ((i.x * (display_width/1920)), (i.y * (display_height/1080))))
+            win.blit(i.get_sprite(), ((i.x * (display_width/1920) - (i.scale[0]/3)), (i.y * (display_height/1080) - i.scale[1]/3)))
 
     pygame.display.update()
 def CoordStop(coord): #наступил ли на останавливающую кнопку
@@ -241,14 +246,14 @@ menu = Menu(punkts) #создаем объект класса Menu
 
 #создаем игроков
 Gamers = [Player(1692, 900, "./horse/horse.png", 0, 0, "1", 13),\
-        Player(1718, 900, "player.png", 0, 0, "2")]
+        Player(1718, 900, "./monkey/monkey.png", 0, 0, "2", 8, (200, 160))]
 
 item_selection = menu.start(win) #возвращает выбранный пункт меню
 if item_selection == 1: #если игрок выбрал игроку в троем
-    Gamers.append(Player(1649, 896, "player.png", 0, 0, "3"))
+    Gamers.append(Player(1649, 896, "./dog/dog.png", 0, 0, "3", 8, (140, 110)))
 elif item_selection == 2: #если выбрал игроку в четвером
-    Gamers.append(Player(1649, 896, "player.png", 0, 0, "3"))
-    Gamers.append(Player(1670, 896, "player.png", 0, 0, "4"))
+    Gamers.append(Player(1649, 896, "./dog/dog.png", 0, 0, "3", 8, (140, 110)))
+    Gamers.append(Player(1670, 896, "./cat/cat.png", 0, 0, "4", 16, (160, 120)))
 
 drawWindow(Gamers) #рисуем фон
 
