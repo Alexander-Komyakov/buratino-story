@@ -14,12 +14,13 @@ move = 0
 #и все они отталкиваются от начального
 
 class Player(): #игрок
-    def __init__(self, x, y, path, stop, coord, name, frame_count=1, scale=(100,80)): #координаты x y путь к картинке, остановлен, координаты по цифрам, имя
+    def __init__(self, x, y, path, stop, coord, name, frame_count=1, scale=(100,80), flip=False): #координаты x y путь к картинке, остановлен, координаты по цифрам, имя
         self.x = x; self.y = y
         self.path = path
         self.stop = stop
         self.coord = coord
         self.name = name
+        self.flip = flip
         #анимация, n спрайтов
         self.sprites = []
         #количество спрайтов
@@ -28,6 +29,9 @@ class Player(): #игрок
         self.set_sprite(self.path, self.frame_count)
         self.now_sprite = 0
         self.time_begin = time.time()
+        #состояние, в какую сторону повернут игрок
+        #left or right
+        self.flip_side = False
     def set_sprite(self, path, frame_count=1):
         #загружаем кадры
         for i in range(0, frame_count):
@@ -37,6 +41,8 @@ class Player(): #игрок
 
             self.sprites.append(pygame.image.load(new_path))
             self.sprites[i] = pygame.transform.scale(self.sprites[i], self.scale)
+            if (self.flip):
+                self.sprites[i] = pygame.transform.flip(self.sprites[i], True, False)
             self.sprites[i].set_colorkey((255, 255, 255))
     def get_sprite(self, anim=False):
         if (anim):
@@ -50,6 +56,16 @@ class Player(): #игрок
             else:
                 self.now_sprite = 0
             self.time_begin = time.time()
+    #установка стороны движения
+    def flip_set(self, flip_side):
+        if (self.flip_side != flip_side):
+            self.flipy()
+            self.flip_side = flip_side
+    #поворот героя
+    def flipy(self):
+        for i in range(0, self.frame_count):
+            self.sprites[i] = pygame.transform.flip(self.sprites[i], True, False)
+            self.sprites[i].set_colorkey((255, 255, 255))
 
     def beginToEnd(self, endX, endY, speed=0.001): #двигает игрока к конечной точке на 1 пиксель и если он достиг возвращает True
         end = False
@@ -57,8 +73,10 @@ class Player(): #игрок
             end = True
         elif self.x + 50 < endX: #если x игрока меньше конечной точки
             self.x += 4 #увеличиваем x игрока
+            self.flip_set(True) #устанавливаем сторону поворота героя
         elif self.x + 50 > endX: #если x игрока больше
             self.x -= 4 #уменьшаем
+            self.flip_set(False)
 
         if self.y + 50 >= endY - 5 and  self.y + 50 <= endY + 5: #если пришел к концу по x и по y
             if end == True:
@@ -245,14 +263,14 @@ punkts = [["Два игрока", 116, display_width//2 - 280, display_height//2
 menu = Menu(punkts) #создаем объект класса Menu
 
 #создаем игроков
-Gamers = [Player(1692, 900, "./horse/horse.png", 0, 0, "1", 13),\
+Gamers = [Player(1692, 900, "./horse/horse.png", 0, 0, "1", 13, (100, 80), True),\
         Player(1718, 900, "./monkey/monkey.png", 0, 0, "2", 8, (200, 160))]
 
 item_selection = menu.start(win) #возвращает выбранный пункт меню
 if item_selection == 1: #если игрок выбрал игроку в троем
-    Gamers.append(Player(1649, 896, "./dog/dog.png", 0, 0, "3", 8, (140, 110)))
+    Gamers.append(Player(1649, 896, "./dog/dog.png", 0, 0, "3", 8, (140, 110), True))
 elif item_selection == 2: #если выбрал игроку в четвером
-    Gamers.append(Player(1649, 896, "./dog/dog.png", 0, 0, "3", 8, (140, 110)))
+    Gamers.append(Player(1649, 896, "./dog/dog.png", 0, 0, "3", 8, (140, 110), True))
     Gamers.append(Player(1670, 896, "./cat/cat.png", 0, 0, "4", 16, (160, 120)))
 
 drawWindow(Gamers) #рисуем фон
@@ -334,6 +352,7 @@ while victory == False: #пока никто не победил работае�
     #плавное движение модельки к месту
     begin = Gamers[move].coord #начальная координата героя
     end = CoordCalculation(Gamers[move].coord) #конечная требуемая координата
+
     while True:
         if Gamers[move].beginToEnd(coordMap[end][0], coordMap[end][1]): #если игрок пришел к требуемой точке
             break #переходим к следующей
