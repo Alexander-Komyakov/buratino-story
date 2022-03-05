@@ -245,13 +245,13 @@ pygame.display.toggle_fullscreen #полноэкранный режим
 win = pygame.display.set_mode((display_width, display_height)) #создаем окно
 pygame.display.set_caption("Buratino Story") #подписываем окно
 
-fon = pygame.image.load("fon.jpeg") #загружаем карту игры
+fon = pygame.image.load("./images/fon.jpeg") #загружаем карту игры
 fon = pygame.transform.scale(fon, (display_width, display_height))
 
-menu_fon = pygame.image.load("menu_fon.jpeg") #загружаем фон меню
+menu_fon = pygame.image.load("./images/menu_fon.jpeg") #загружаем фон меню
 menu_fon = pygame.transform.scale(menu_fon, (display_width, display_height))
 
-cubSprite = pygame.image.load("kost1.png") #спрайт кубика
+cubSprite = pygame.image.load("./images/kost1.png") #спрайт кубика
 
 font_path = "buratino.ttf"
 #пункты меню
@@ -263,15 +263,15 @@ punkts = [["Два игрока", 116, display_width//2 - 280, display_height//2
 menu = Menu(punkts) #создаем объект класса Menu
 
 #создаем игроков
-Gamers = [Player(1692, 900, "./horse/horse.png", 0, 0, "1", 13, (100, 80), True),\
-        Player(1718, 900, "./monkey/monkey.png", 0, 0, "2", 8, (200, 160))]
+Gamers = [Player(1692, 900, "./images/horse/horse.png", 0, 0, "1", 13, (100, 80), True),\
+        Player(1718, 900, "./images/monkey/monkey.png", 0, 0, "2", 8, (200, 160))]
 
 item_selection = menu.start(win) #возвращает выбранный пункт меню
 if item_selection == 1: #если игрок выбрал игроку в троем
-    Gamers.append(Player(1649, 896, "./dog/dog.png", 0, 0, "3", 8, (140, 110), True))
+    Gamers.append(Player(1649, 896, "./images/dog/dog.png", 0, 0, "3", 8, (140, 110), True))
 elif item_selection == 2: #если выбрал игроку в четвером
-    Gamers.append(Player(1649, 896, "./dog/dog.png", 0, 0, "3", 8, (140, 110), True))
-    Gamers.append(Player(1670, 896, "./cat/cat.png", 0, 0, "4", 16, (160, 120)))
+    Gamers.append(Player(1649, 896, "./images/dog/dog.png", 0, 0, "3", 8, (140, 110), True))
+    Gamers.append(Player(1670, 896, "./images/cat/cat.png", 0, 0, "4", 16, (160, 120)))
 
 drawWindow(Gamers) #рисуем фон
 
@@ -315,7 +315,7 @@ while victory == False: #пока никто не победил работае�
                     drawWindow(Gamers)
                     
     cub = random.randint(1, 6)
-    pathToCub = str("kost"+str(cub)+".png")
+    pathToCub = str("./images/kost"+str(cub)+".png")
     cubSprite = pygame.image.load(pathToCub) #спрайт кубика
     #проверяем, не победил ли кто-то
     for i in range(0, len(Gamers)):
