@@ -336,9 +336,10 @@ while victory == False: #пока никто не победил работае�
 				sys.exit()
 			if event.type == pygame.KEYUP:
 				if event.key == pygame.K_SPACE:
-					soundCube.play()
-					time.sleep(1)
-					Gamers[move].play_Music()
+					if (key == True):
+						soundCube.play()
+						time.sleep(1)
+						Gamers[move].play_Music()
 					key = False 
 				if event.key == pygame.K_ESCAPE:
 					menu.pause(win)
@@ -360,7 +361,7 @@ while victory == False: #пока никто не победил работае�
 	if Gamers[move].coord + cub > 100 or CoordCalculation(Gamers[move].coord + cub) > 100:
 		drawWindow(Gamers)
 		text = vicText.render("Победил "+Gamers[i].name+" игрок", True, [255, 0, 0])
-		win.blit(text, (650, 500))
+		win.blit(text, (650 * (display_width/1920), 500 * (display_height/1080)))
 		pygame.display.update()
 		time.sleep(3)
 		sys.exit()
