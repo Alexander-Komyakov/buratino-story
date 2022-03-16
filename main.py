@@ -13,7 +13,8 @@ soundFon = []
 soundCube = mixer.Sound("./music/cube.mp3")
 soundDoor = mixer.Sound("./music/door.mp3")
 soundFonRand = random.randrange(0, 7)
-for i in range(0, 7):
+soundEndOfMove = mixer.Sound("./music/delo.mp3")
+for i in range(0, 8):
 	soundFon.append(mixer.Sound("./music/fon" + str(i+1) + ".mp3"))
 	soundFon[i].set_volume(0.2)
 
@@ -50,7 +51,7 @@ class Player(): #игрок
 				self.fullSound.append(mixer.Sound(i))
 	def play_Music(self):
 		if (self.pathToMusic != "None"):
-			if (random.randrange(0, 4) == 1):
+			if (random.randrange(0, 8) == 1):
 				self.fullSound[random.randrange(0, len(self.pathToMusic))].play()
 	def set_sprite(self, path, frame_count=1):
 		#загружаем кадры
@@ -126,11 +127,11 @@ class Menu():
 		for i in punkts:
 			if i == Punkt:
 				self.font = pygame.font.Font(font_path, i[1]) 
-				self.text = self.font.render(i[0], True, [255, 0, 0])
+				self.text = self.font.render(i[0], True, [163, 38, 46])
 				screen.blit(self.text, (i[2], i[3]))
 			else:
 				self.font = pygame.font.Font(font_path, i[1]) 
-				self.text = self.font.render(i[0], True, [0, 0, 0])
+				self.text = self.font.render(i[0], True, [194, 192, 81])
 				screen.blit(self.text, (i[2], i[3]))
 		pygame.display.update()
 	def start(self, win):
@@ -293,18 +294,19 @@ Gamers = [Player(1692, 900, "./images/horse/horse.png", \
 			(["./music/monkey" + str(i) + ".mp3" for i in range(1, 4)]))]
 
 item_selection = menu.start(win) #возвращает выбранный пункт меню
-if item_selection == 1: #если игрок выбрал игроку в троем
-	Gamers.append(Player(1649, 896, "./images/dog/dog.png", 0, 0, "3", 8, (140, 110), True))
-elif item_selection == 2: #если выбрал игроку в четвером
-	Gamers.append(Player(1649, 896, "./images/dog/dog.png", 0, 0, "3", 8, (140, 110), True))
-	Gamers.append(Player(1670, 896, "./images/cat/cat.png", 0, 0, "4", 16, (160, 120)))
+if item_selection >= 1: #если игрок выбрал игроку в троем
+	Gamers.append(Player(1649, 896, "./images/dog/dog.png", 0, 0, "3", 8, (140, 110), True,\
+	(["./music/dog" + str(i) + ".mp3" for i in range(1, 6)])))
+elif item_selection >= 2: #если выбрал игроку в четвером
+	Gamers.append(Player(1670, 896, "./images/cat/cat.png", 0, 0, "4", 16, (160, 120), False, 
+	(["./music/cat" + str(i) + ".mp3" for i in range(1, 3)])))
 
 drawWindow(Gamers) #рисуем фон
 
 victory = False #победа
 
 vicText = pygame.font.Font(font_path, 100) 
-text = vicText.render("Победил ", True, [255, 0, 0])
+text = vicText.render("Победил ", True, [194, 192, 81])
 
 soundFon[soundFonRand].play(loops=True)
 while victory == False: #пока никто не победил работает игра
@@ -340,6 +342,8 @@ while victory == False: #пока никто не победил работае�
 						soundCube.play()
 						time.sleep(1)
 						Gamers[move].play_Music()
+						if (random.randrange(0, 40) == 20):
+							soundEndOfMove.play()
 					key = False 
 				if event.key == pygame.K_ESCAPE:
 					menu.pause(win)
@@ -352,7 +356,7 @@ while victory == False: #пока никто не победил работае�
 	for i in range(0, len(Gamers)):
 		if Gamers[i].coord > 100:
 			drawWindow(Gamers)
-			text = vicText.render("Победил "+Gamers[i].name+" игрок", True, [255, 0, 0])
+			text = vicText.render("Победил "+Gamers[i].name+" игрок", True, [194, 192, 81])
 			win.blit(text, (650 * (display_width/1920), 500 * (display_height/1080)))
 			pygame.display.update()
 			time.sleep(3)
@@ -360,7 +364,7 @@ while victory == False: #пока никто не победил работае�
 
 	if Gamers[move].coord + cub > 100 or CoordCalculation(Gamers[move].coord + cub) > 100:
 		drawWindow(Gamers)
-		text = vicText.render("Победил "+Gamers[i].name+" игрок", True, [255, 0, 0])
+		text = vicText.render("Победил "+Gamers[i].name+" игрок", True, [194, 192, 81])
 		win.blit(text, (650 * (display_width/1920), 500 * (display_height/1080)))
 		pygame.display.update()
 		time.sleep(3)
