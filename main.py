@@ -297,7 +297,7 @@ item_selection = menu.start(win) #возвращает выбранный пун
 if item_selection >= 1: #если игрок выбрал игроку в троем
 	Gamers.append(Player(1649, 896, "./images/dog/dog.png", 0, 0, "3", 8, (140, 110), True,\
 	(["./music/dog" + str(i) + ".mp3" for i in range(1, 6)])))
-elif item_selection >= 2: #если выбрал игроку в четвером
+if item_selection >= 2: #если выбрал игроку в четвером
 	Gamers.append(Player(1670, 896, "./images/cat/cat.png", 0, 0, "4", 16, (160, 120), False, 
 	(["./music/cat" + str(i) + ".mp3" for i in range(1, 3)])))
 
